@@ -58,114 +58,19 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/f1_dl_raw')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Azure_f1_dl_pl",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"window_end_date": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": {
-							"value": "@formatDateTime(dataset().window_end_date, 'yyyy-MM-dd')",
-							"type": "Expression"
-						},
-						"fileSystem": "raw"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"constructorId": {
-							"type": "integer"
-						},
-						"constructorRef": {
-							"type": "string"
-						},
-						"name": {
-							"type": "string"
-						},
-						"nationality": {
-							"type": "string"
-						},
-						"url": {
-							"type": "string"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Azure_f1_dl_pl')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/f1_ingestion_pl')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Get folder meta data",
-						"description": "Fetches the meta data of the folder specified",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "f1_dl_raw",
-								"type": "DatasetReference",
-								"parameters": {
-									"window_end_date": {
-										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
-										"type": "Expression"
-									}
-								}
-							},
-							"fieldList": [
-								"exists"
-							],
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "JsonReadSettings"
-							}
-						}
-					},
-					{
-						"name": "If folder exists",
+						"name": "If Folder Exists",
 						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Get folder meta data",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@activity('Get folder meta data').output.exists",
+								"value": "@activity('Circuits Ingestion').output.pipelineReturnValue",
 								"type": "Expression"
 							},
 							"ifTrueActivities": [
@@ -189,7 +94,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -219,7 +124,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -249,7 +154,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -309,7 +214,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -339,7 +244,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -369,7 +274,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -399,7 +304,7 @@
 												"type": "Expression"
 											},
 											"file_date": {
-												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
 												"type": "Expression"
 											}
 										}
@@ -431,8 +336,58 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/f1_dl_raw')]",
 				"[concat(variables('factoryId'), '/linkedServices/databricks_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/f1_dl_raw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_f1_dl_pl",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"window_end_date": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@formatDateTime(dataset().window_end_date, 'yyyy-MM-dd')",
+							"type": "Expression"
+						},
+						"fileSystem": "raw"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"constructorId": {
+							"type": "integer"
+						},
+						"constructorRef": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"nationality": {
+							"type": "string"
+						},
+						"url": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_f1_dl_pl')]"
 			]
 		}
 	]
