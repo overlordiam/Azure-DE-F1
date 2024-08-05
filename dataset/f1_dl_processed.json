@@ -1,0 +1,27 @@
+{
+	"name": "f1_dl_processed",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "f1_dl_processed_ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"window_end_date": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@formatDateTime(dataset().window_end_date, 'yyyy-MM-dd')",
+					"type": "Expression"
+				},
+				"fileSystem": "processed"
+			}
+		},
+		"schema": {}
+	}
+}

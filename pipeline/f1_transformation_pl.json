@@ -1,0 +1,103 @@
+{
+	"name": "f1_transformation_pl",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Folder Exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Folder details",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Get Folder details').output.exists",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Race_results transformation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Formula-1/transformations/race_results",
+								"baseParameters": {
+									"file_date": {
+										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "databricks_ls",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Folder details",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "f1_dl_processed",
+						"type": "DatasetReference",
+						"parameters": {
+							"window_end_date": {
+								"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"window_end_date": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"data_src": {
+				"type": "String",
+				"defaultValue": "Ergast"
+			}
+		},
+		"annotations": []
+	}
+}
