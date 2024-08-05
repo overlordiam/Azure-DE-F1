@@ -1,0 +1,43 @@
+{
+	"name": "f1_ingestion_pl",
+	"properties": {
+		"activities": [
+			{
+				"name": "Circuits Ingestion",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Formula-1/ingestions/ingest_circuits_file",
+					"baseParameters": {
+						"data_src": {
+							"value": "@variables('data_src')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "databricks_ls",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"data_src": {
+				"type": "String",
+				"defaultValue": "Ergast"
+			},
+			"file_date": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
