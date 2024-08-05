@@ -1,0 +1,439 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "course-project-1"
+		},
+		"Azure_f1_dl_pl_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Azure_f1_dl_pl'"
+		},
+		"Azure_f1_dl_pl_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://datalakeforprojformula1.dfs.core.windows.net/"
+		},
+		"databricks_ls_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0723-192459-6ez2brzf"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/f1_ingestion_pl')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get folder meta data",
+						"description": "Fetches the meta data of the folder specified",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "f1_dl_raw",
+								"type": "DatasetReference",
+								"parameters": {
+									"window_end_date": {
+										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "JsonReadSettings"
+							}
+						}
+					},
+					{
+						"name": "If folder exists",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get folder meta data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('Get folder meta data').output.exists",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Circuits Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_circuits_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Constructors Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_constructors_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Races Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_races_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Pit_stops Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_pit_stops_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Drivers Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_drivers_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Lap_times Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_lap_times_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Qualifying Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_qualifying_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Results Ingestion",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Formula-1/ingestions/ingest_results_file",
+										"baseParameters": {
+											"data_src": {
+												"value": "@variables('data_src')",
+												"type": "Expression"
+											},
+											"file_date": {
+												"value": "@formatDateTime(variables('file_date'), 'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "databricks_ls",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"concurrency": 1,
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"window_end_date": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"data_src": {
+						"type": "String",
+						"defaultValue": "Ergast"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/f1_dl_raw')]",
+				"[concat(variables('factoryId'), '/linkedServices/databricks_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/f1_dl_raw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_f1_dl_pl",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"window_end_date": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@formatDateTime(dataset().window_end_date, 'yyyy-MM-dd')",
+							"type": "Expression"
+						},
+						"fileSystem": "raw"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"constructorId": {
+							"type": "integer"
+						},
+						"constructorRef": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"nationality": {
+							"type": "string"
+						},
+						"url": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_f1_dl_pl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_f1_dl_pl')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('Azure_f1_dl_pl_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('Azure_f1_dl_pl_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/databricks_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-160875322594040.0.azuredatabricks.net",
+					"authentication": "MSI",
+					"workspaceResourceId": "/subscriptions/a3c18c13-ad86-4bcb-bad5-e988a19ad4a7/resourceGroups/databricks-project-1/providers/Microsoft.Databricks/workspaces/Project-1",
+					"existingClusterId": "[parameters('databricks_ls_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
