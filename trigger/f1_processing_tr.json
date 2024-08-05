@@ -1,0 +1,29 @@
+{
+	"name": "f1_processing_tr",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipeline": {
+			"pipelineReference": {
+				"referenceName": "f1_data_process_pl",
+				"type": "PipelineReference"
+			},
+			"parameters": {
+				"window_end_date": "@trigger().outputs.windowEndDate"
+			}
+		},
+		"type": "TumblingWindowTrigger",
+		"typeProperties": {
+			"frequency": "Hour",
+			"interval": 168,
+			"startTime": "2021-03-14T22:00:00Z",
+			"endTime": "2021-04-25T22:00:00Z",
+			"delay": "00:00:00",
+			"maxConcurrency": 1,
+			"retryPolicy": {
+				"intervalInSeconds": 30
+			},
+			"dependsOn": []
+		}
+	}
+}
