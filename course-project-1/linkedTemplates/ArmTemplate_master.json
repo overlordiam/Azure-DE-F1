@@ -29,7 +29,7 @@
 		},
 		"f1_processing_tr_properties_pipeline_parameters_window_end_date": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndDate"
+			"defaultValue": "@trigger().outputs.windowEndTime"
 		},
 		"containerUri": {
 			"type": "string",

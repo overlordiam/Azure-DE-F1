@@ -21,7 +21,7 @@
 			"value": "https://datalakeforprojformula1.dfs.core.windows.net/"
 		},
 		"f1_processing_tr_properties_pipeline_parameters_window_end_date": {
-			"value": "@trigger().outputs.windowEndDate"
+			"value": "@trigger().outputs.windowEndTime"
 		}
 	}
 }
