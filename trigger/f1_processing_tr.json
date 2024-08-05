@@ -2,7 +2,7 @@
 	"name": "f1_processing_tr",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipeline": {
 			"pipelineReference": {
 				"referenceName": "f1_data_process_pl",
