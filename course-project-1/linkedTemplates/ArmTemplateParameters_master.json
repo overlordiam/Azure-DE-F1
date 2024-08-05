@@ -8,11 +8,20 @@
 		"Azure_f1_dl_pl_accountKey": {
 			"value": ""
 		},
+		"f1_dl_processed_ls_accountKey": {
+			"value": ""
+		},
 		"Azure_f1_dl_pl_properties_typeProperties_url": {
 			"value": "https://datalakeforprojformula1.dfs.core.windows.net/"
 		},
 		"databricks_ls_properties_typeProperties_existingClusterId": {
 			"value": "0723-192459-6ez2brzf"
+		},
+		"f1_dl_processed_ls_properties_typeProperties_url": {
+			"value": "https://datalakeforprojformula1.dfs.core.windows.net/"
+		},
+		"f1_processing_tr_properties_pipeline_parameters_window_end_date": {
+			"value": "@trigger().outputs.windowEndDate"
 		},
 		"containerUri": {
 			"value": ""

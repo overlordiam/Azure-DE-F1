@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'Azure_f1_dl_pl'"
 		},
+		"f1_dl_processed_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'f1_dl_processed_ls'"
+		},
 		"Azure_f1_dl_pl_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://datalakeforprojformula1.dfs.core.windows.net/"
@@ -18,6 +22,14 @@
 		"databricks_ls_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0723-192459-6ez2brzf"
+		},
+		"f1_dl_processed_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://datalakeforprojformula1.dfs.core.windows.net/"
+		},
+		"f1_processing_tr_properties_pipeline_parameters_window_end_date": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowEndDate"
 		},
 		"containerUri": {
 			"type": "string",
@@ -49,11 +61,20 @@
 					"Azure_f1_dl_pl_accountKey": {
 						"value": "[parameters('Azure_f1_dl_pl_accountKey')]"
 					},
+					"f1_dl_processed_ls_accountKey": {
+						"value": "[parameters('f1_dl_processed_ls_accountKey')]"
+					},
 					"Azure_f1_dl_pl_properties_typeProperties_url": {
 						"value": "[parameters('Azure_f1_dl_pl_properties_typeProperties_url')]"
 					},
 					"databricks_ls_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('databricks_ls_properties_typeProperties_existingClusterId')]"
+					},
+					"f1_dl_processed_ls_properties_typeProperties_url": {
+						"value": "[parameters('f1_dl_processed_ls_properties_typeProperties_url')]"
+					},
+					"f1_processing_tr_properties_pipeline_parameters_window_end_date": {
+						"value": "[parameters('f1_processing_tr_properties_pipeline_parameters_window_end_date')]"
 					}
 				}
 			},
