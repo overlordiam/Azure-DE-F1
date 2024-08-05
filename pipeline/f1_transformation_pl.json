@@ -45,6 +45,98 @@
 								"referenceName": "databricks_ls",
 								"type": "LinkedServiceReference"
 							}
+						},
+						{
+							"name": "Driver_standings transformation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Race_results transformation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Formula-1/transformations/driver_standings",
+								"baseParameters": {
+									"file_date": {
+										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "databricks_ls",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Constructor_standings transformation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Race_results transformation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Formula-1/transformations/constructor_standings",
+								"baseParameters": {
+									"file_date": {
+										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "databricks_ls",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Calculated_results transformation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Formula-1/transformations/calculated_race_results",
+								"baseParameters": {
+									"file_date": {
+										"value": "@formatDateTime(pipeline().parameters.window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "databricks_ls",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
