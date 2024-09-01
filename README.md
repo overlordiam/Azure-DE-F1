@@ -17,6 +17,8 @@ The Delta Lake architecture is segmented into three key layers:
 - Python
 - PySpark
 - SQL
+- Databricks
+- Azure Suite
 - Power BI
 
 ## Azure Services Utilized
